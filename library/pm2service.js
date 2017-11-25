@@ -4,17 +4,16 @@
 
 var pm2 = require('pm2');
 
+
 // Parse input arguments
 
-var arguments = new Hash(process.argv.slice(2));
+var ansible_opts = {};
+var module_args = {};
 
-var ansible_opts = Object.keys(arguments).filter(function(key){
-  arguments[key].startsWith("_");
-  });
-
-var module_args = Object.keys(arguments).filter(function(key){
-  ! arguments[key].startsWith("_");
-  });
+for (var i = 2; i < process.argv.length; i+=2) {
+  var key = process.argv[i];
+  key.startsWith("_ansible_") ? ansible_opts[key.substring(9)] = process.argv[i+1] : module_args[key] = process.argv[i+1];
+  }
 
 
 // Verify required arguments
