@@ -4,7 +4,6 @@
 
 var pm2 = require('pm2');
 
-
 // Parse input arguments
 
 var arguments = new Hash(process.argv.slice(2));
@@ -18,14 +17,10 @@ var module_args = Object.keys(arguments).filter(function(key){
   });
 
 
-var result = { "changed": false }
-
-
 // Verify required arguments
 
 if ( ! module_args.name ) {
-  result.error = "Missing required argument 'name'";
-  console.log(JSON.stringify(result));
-  process.exit()
+  console.log(JSON.stringify({"failed": true, "msg": "Missing required argument 'name'"));
+  process.exit(1);
   }
 
