@@ -23,3 +23,39 @@ if ( ! module_args.name ) {
   process.exit(1);
   }
 
+
+// Get running processes
+
+function parseProcess(process){
+  return { "name": process.name,
+           "status": process.pm2_env.status,
+           "cwd": process.pm2_env.pm_cwd,
+           "interpreter": process.pm2_env.exec_interpreter,
+           "interpreterArgs": process.pm2_env.node_args,
+           "script": process.pm2_env.pm_exec_path,
+           "args": process.pm2_env.args
+           };
+  }
+
+
+var pm2 = require('pm2');
+
+pm2.connect(true, function(err) {
+  if (err) {
+    console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
+    process.exit(2);
+    }
+
+  var services = [];
+
+  pm2.list(function(err, processDescriptionList){
+    if (err) {
+      console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
+      process.exit(2);
+      }
+    services.push(processDescriptionList.map(parseProcess));
+    pm2.disconnect();
+    });
+
+  });
+
