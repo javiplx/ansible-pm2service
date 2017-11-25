@@ -20,7 +20,7 @@ var module_args = Object.keys(arguments).filter(function(key){
 // Verify required arguments
 
 if ( ! module_args.name ) {
-  console.log(JSON.stringify({"failed": true, "msg": "Missing required argument 'name'"));
+  console.log(JSON.stringify({"failed": true, "msg": "Missing required argument 'name'"}));
   process.exit(1);
   }
 
