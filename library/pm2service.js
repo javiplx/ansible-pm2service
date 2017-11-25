@@ -53,7 +53,10 @@ pm2.connect(true, function(err) {
       console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
       process.exit(2);
       }
-    services.push(processDescriptionList.map(parseProcess));
+    processDescriptionList.forEach(function(process){
+      services.push(parseProcess(process));
+      });
+    var service = services.filter(function(item){return item.name===module_args.name})[0];
     pm2.disconnect();
     });
 
