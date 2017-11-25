@@ -57,7 +57,24 @@ pm2.connect(true, function(err) {
       services.push(parseProcess(process));
       });
     var service = services.filter(function(item){return item.name===module_args.name})[0];
+
+    var result = { "changed": false };
+
+    var changes = Object.keys(module_args).filter(function(name){
+      return module_args[name]!=service[name];
+    }).reduce(function(result,name){
+      result[name] = module_args[name];
+      return result;
+      },{});
+
     pm2.disconnect();
+
+    if ( Object.keys(changes).length != 0 ) {
+      result.changed = true;
+      result.changes = changes;
+      }
+    console.log(JSON.stringify(result));
+
     });
 
   });
