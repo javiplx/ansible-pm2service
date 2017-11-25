@@ -43,6 +43,7 @@ var pm2 = require('pm2');
 pm2.connect(true, function(err) {
   if (err) {
     console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
+    pm2.disconnect();
     process.exit(2);
     }
 
@@ -51,6 +52,7 @@ pm2.connect(true, function(err) {
   pm2.list(function(err, processDescriptionList){
     if (err) {
       console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
+      pm2.disconnect();
       process.exit(2);
       }
     processDescriptionList.forEach(function(process){
