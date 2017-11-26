@@ -58,6 +58,8 @@ pm2.connect(true, function(err) {
     processDescriptionList.forEach(function(process){
       services.push(parseProcess(process.name, process.pm2_env));
       });
+    pm2.disconnect();
+
     var service = services.filter(function(item){return item.name===module_args.name})[0];
 
     if ( service === undefined ) {
@@ -81,17 +83,21 @@ pm2.connect(true, function(err) {
           });
         });
     } else {
-      pm2.list(function(err, processDescriptionList){
-        if (err) {
-          console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
-          pm2.disconnect();
-          process.exit(2);
-          }
-        processDescriptionList.forEach(function(process){
-          services.push(parseProcess(process.name, process.pm2_env));
-          });
+      var result = { "changed": false };
 
-        service = services.filter(function(item){return item.name===module_args.name})[0];
+      var changes = Object.keys(module_args).filter(function(name){
+        return module_args[name]!=service[name];
+      }).reduce(function(result,name){
+        name === "args"
+          ? service[name] = module_args[name].split(" ")
+          : service[name] = module_args[name];
+        result[name] = module_args[name].split(" ");
+        return result;
+        },{});
+
+      if ( Object.keys(changes).length != 0 ) {
+        result.changed = true;
+        result.changes = changes;
         pm2.connect(true, function(err) {
           if (err) {
             console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
@@ -99,25 +105,20 @@ pm2.connect(true, function(err) {
             process.exit(2);
             }
 
-          var result = { "changed": false };
-
-          var changes = Object.keys(module_args).filter(function(name){
-            return module_args[name]!=service[name];
-          }).reduce(function(result,name){
-            result[name] = module_args[name];
-            return result;
-            },{});
-
-          if ( Object.keys(changes).length != 0 ) {
-            result.changed = true;
-            result.changes = changes;
-            }
-          console.log(JSON.stringify(result));
-
+          pm2.restart(service, function(err, services) {
+            if (err) {
+              console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err, "otros": apps}));
+              pm2.disconnect();
+              process.exit(2);
+              }
+            var service = parseProcess(services[0].pm2_env.name, services[0].pm2_env);
+            console.log(JSON.stringify({"CHANGED": true, "changes": service}));
+            console.log(JSON.stringify(result));
+            pm2.disconnect();
+            });
           });
-        });
+        }
       }
-      pm2.disconnect();
 
     });
   });
