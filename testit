@@ -1,0 +1,29 @@
+
+echo
+
+echo "NUEVO"
+library/pm2service.js _ansible_version 2.4.1.0 _ansible_selinux_special_fs fuse,nfs _ansible_no_log false _ansible_module_name prueba _ansible_verbosity 2 _ansible_diff true _ansible_debug false _ansible_check_mode true name nuevapp interpreter node script server.js
+echo
+
+echo "SIN CAMBIOS"
+library/pm2service.js _ansible_version 2.4.1.0 _ansible_selinux_special_fs fuse,nfs _ansible_no_log false _ansible_module_name prueba _ansible_verbosity 2 _ansible_diff true _ansible_debug false _ansible_check_mode true name myapp interpreter node
+echo
+
+echo "CON CAMBIOS"
+library/pm2service.js _ansible_version 2.4.1.0 _ansible_selinux_special_fs fuse,nfs _ansible_no_log false _ansible_module_name prueba _ansible_verbosity 2 _ansible_diff true _ansible_debug false _ansible_check_mode true name myapp args "--config $RANDOM"
+echo
+
+COMMON_ARGS="_ansible_version 2.4.1.0 _ansible_selinux_special_fs fuse,nfs _ansible_no_log false _ansible_module_name prueba _ansible_verbosity 2 _ansible_diff true _ansible_debug false _ansible_check_mode true"
+
+echo "CON ERRORES"
+library/pm2service.js ${COMMON_ARGS} name myapp state started
+echo
+library/pm2service.js ${COMMON_ARGS} name myapp
+echo
+library/pm2service.js ${COMMON_ARGS} name myapp state badstate
+echo
+library/pm2service.js ${COMMON_ARGS} name myapp badargument value
+echo
+library/pm2service.js ${COMMON_ARGS} name myapp badargument value anotherbadargument badvalue
+echo
+
