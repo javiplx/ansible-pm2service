@@ -8,11 +8,11 @@ library/pm2service.js ${COMMON_ARGS} name nuevapp interpreter node script server
 echo
 
 echo "SIN CAMBIOS"
-library/pm2service.js ${COMMON_ARGS} name myapp interpreter node
+library/pm2service.js ${COMMON_ARGS} name myapp interpreter node script server.js
 echo
 
 echo "CON CAMBIOS"
-library/pm2service.js ${COMMON_ARGS} name myapp args "--config $RANDOM"
+library/pm2service.js ${COMMON_ARGS} name myapp args "--config $RANDOM" script server.js
 echo
 
 echo "CON ERRORES"
