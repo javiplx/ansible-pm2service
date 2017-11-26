@@ -79,7 +79,10 @@ if ( ! module_args.name ) {
   process.exit(1);
   }
 
-if ( ( module_args.state === "started" && ! module_args.script ) || ( ! module_args.state && ! module_args.script ) ) {
+if ( ! module_args.state )
+  module_args.state = "started";
+
+if ( module_args.state === "started" && ! module_args.script ) {
   console.log(JSON.stringify({"failed": true, "msg": "When state is 'started' argument 'script' is required"}));
   process.exit(1);
   }
