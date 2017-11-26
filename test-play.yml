@@ -1,0 +1,9 @@
+
+- name: pm2ansible testing playbook
+  hosts: localhost
+  tasks:
+    - name: create pm2 service
+      pm2service:
+        name: myapp
+        script: server.js
+

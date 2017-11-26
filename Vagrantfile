@@ -13,5 +13,6 @@ Vagrant.configure("2") do |config|
     ln -sf /vagrant /home/vagrant/.ansible/roles/pm2service
     mkdir -p /usr/share/ansible/roles
     npm install --global pm2
+    grep -q NODE_PATH /home/vagrant/.bashrc || echo 'export NODE_PATH=/usr/lib/node_modules' >> /home/vagrant/.bashrc
   SHELL
 end
