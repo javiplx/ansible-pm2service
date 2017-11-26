@@ -26,14 +26,14 @@ if ( ! module_args.name ) {
 
 // Get running processes
 
-function parseProcess(process){
-  return { "name": process.name,
-           "status": process.pm2_env.status,
-           "cwd": process.pm2_env.pm_cwd,
-           "interpreter": process.pm2_env.exec_interpreter,
-           "interpreterArgs": process.pm2_env.node_args,
-           "script": process.pm2_env.pm_exec_path,
-           "args": process.pm2_env.args
+function parseProcess(name, env){
+  return { "name": name,
+           "status": env.status,
+           "cwd": env.pm_cwd || env.cwd,
+           "interpreter": env.exec_interpreter || env.interpreter,
+           "interpreterArgs": env.node_args || env.interpreter_args,
+           "script": env.pm_exec_path || env.script,
+           "args": env.args
            };
   }
 
@@ -56,28 +56,69 @@ pm2.connect(true, function(err) {
       process.exit(2);
       }
     processDescriptionList.forEach(function(process){
-      services.push(parseProcess(process));
+      services.push(parseProcess(process.name, process.pm2_env));
       });
     var service = services.filter(function(item){return item.name===module_args.name})[0];
 
-    var result = { "changed": false };
+    if ( service === undefined ) {
+      // The only secure way to ensure sequential execution seems to enclose connects within connect within connects ...
+      pm2.connect(true, function(err) {
+        if (err) {
+          console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
+          pm2.disconnect();
+          process.exit(2);
+          }
+        service = parseProcess(module_args.name, module_args);
+        pm2.start(service, function(err, services) {
+          if (err) {
+            console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
+            pm2.disconnect();
+            process.exit(2);
+            }
+          var service = parseProcess(services[0].pm2_env.name, services[0].pm2_env);
+          console.log(JSON.stringify({"changed": true, "changes": service}));
+          pm2.disconnect();
+          });
+        });
+    } else {
+      pm2.list(function(err, processDescriptionList){
+        if (err) {
+          console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
+          pm2.disconnect();
+          process.exit(2);
+          }
+        processDescriptionList.forEach(function(process){
+          services.push(parseProcess(process.name, process.pm2_env));
+          });
 
-    var changes = Object.keys(module_args).filter(function(name){
-      return module_args[name]!=service[name];
-    }).reduce(function(result,name){
-      result[name] = module_args[name];
-      return result;
-      },{});
+        service = services.filter(function(item){return item.name===module_args.name})[0];
+        pm2.connect(true, function(err) {
+          if (err) {
+            console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
+            pm2.disconnect();
+            process.exit(2);
+            }
 
-    pm2.disconnect();
+          var result = { "changed": false };
 
-    if ( Object.keys(changes).length != 0 ) {
-      result.changed = true;
-      result.changes = changes;
+          var changes = Object.keys(module_args).filter(function(name){
+            return module_args[name]!=service[name];
+          }).reduce(function(result,name){
+            result[name] = module_args[name];
+            return result;
+            },{});
+
+          if ( Object.keys(changes).length != 0 ) {
+            result.changed = true;
+            result.changes = changes;
+            }
+          console.log(JSON.stringify(result));
+
+          });
+        });
       }
-    console.log(JSON.stringify(result));
+      pm2.disconnect();
 
     });
-
   });
 
