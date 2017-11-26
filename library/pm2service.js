@@ -107,9 +107,9 @@ function parseProcess(name, env){
            "status": env.status,
            "cwd": env.pm_cwd || env.cwd,
            "interpreter": env.exec_interpreter || env.interpreter,
-           "interpreterArgs": env.node_args.join(" ") || env.interpreter_args,
+           "interpreterArgs": env.node_args && env.node_args.join(" ") || env.interpreter_args,
            "script": env.pm_exec_path || env.script,
-           "args": typeof env.args === "string" ? env.args : env.args.join(" ")
+           "args": typeof env.args === "object" ? env.args.join(" ") : env.args
            };
   }
 
