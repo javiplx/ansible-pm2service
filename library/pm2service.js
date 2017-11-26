@@ -151,13 +151,15 @@ pm2.connect(true, function(err) {
         ["interpreterArgs", "args"].includes(name)
           ? service[name] = module_args[name].split(" ")
           : service[name] = module_args[name];
-        result[name] = module_args[name];
+        if ( name != "state" )
+          result[name] = module_args[name];
         return result;
         },{});
 
       if ( Object.keys(changes).length != 0 ) {
         result.changed = true;
         result.changes = changes;
+        result.changes.state = "restarted";
         pm2.restart(service, function(err, apps) {
           if (err) {
             console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err, "otros": apps}));
