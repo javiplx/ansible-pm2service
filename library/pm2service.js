@@ -143,6 +143,11 @@ pm2.connect(true, function(err) {
     } else {
       var service = parseProcess(processDescription[0]);
 
+      var path = require("path");
+      if ( ! path.isAbsolute(module_args.script) ) {
+        module_args.script = path.join(module_args.cwd || service.cwd, module_args.script)
+        }
+
       var result = { "changed": false };
 
       var changes = Object.keys(module_args).filter(function(name){
