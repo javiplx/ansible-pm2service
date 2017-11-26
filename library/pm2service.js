@@ -97,6 +97,12 @@ if ( ! states.includes(module_args.state) ) {
 // Get running processes
 
 function parseProcess(name, env){
+  if ( typeof env === 'undefined' ) {
+    // name is actually "process" with embedded pm2_env property
+    var env_name = name.name;
+    env = name.pm2_env;
+    name = env_name;
+    }
   return { "name": name,
            "status": env.status,
            "cwd": env.pm_cwd || env.cwd,
@@ -125,20 +131,17 @@ pm2.connect(true, function(err) {
       }
 
     if ( processDescription.length == 0 ) {
-      var service = parseProcess(module_args.name, module_args);
-
-      pm2.start(service, function(err, services) {
+      pm2.start(parseProcess(module_args.name, module_args), function(err, apps) {
         if (err) {
           console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
           pm2.disconnect();
           process.exit(2);
           }
-        var service = parseProcess(services[0].pm2_env.name, services[0].pm2_env);
-        console.log(JSON.stringify({"changed": true, "changes": service}));
+        console.log(JSON.stringify({"changed": true, "changes": parseProcess(apps[0])}));
         pm2.disconnect();
         });
     } else {
-      var service = parseProcess(processDescription[0].name, processDescription[0].pm2_env);
+      var service = parseProcess(processDescription[0]);
 
       var result = { "changed": false };
 
@@ -155,14 +158,12 @@ pm2.connect(true, function(err) {
       if ( Object.keys(changes).length != 0 ) {
         result.changed = true;
         result.changes = changes;
-        pm2.restart(service, function(err, services) {
+        pm2.restart(service, function(err, apps) {
           if (err) {
-            console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err, "otros": services}));
+            console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err, "otros": apps}));
             pm2.disconnect();
             process.exit(2);
             }
-          var service = parseProcess(services[0].pm2_env.name, services[0].pm2_env);
-          console.log(JSON.stringify({"changed": true, "changes": service}));
           console.log(JSON.stringify(result));
           pm2.disconnect();
           });
