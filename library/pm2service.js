@@ -2,6 +2,52 @@
 
 // API documentation : http://pm2.keymetrics.io/docs/usage/pm2-api
 
+
+var documentation = `
+---
+module: pm2service
+
+short_description: Manage services with pm2
+
+version_added: "2.2"
+
+description:
+    - Manage services running under pm2 service manager
+
+options:
+    name:
+        description:
+            - Name of the application as given to pm2
+        required: true
+    state:
+        description:
+            - Directory from where application is executed
+        choices: [ started, stopped, absent ]
+        default: started
+    script:
+        description:
+            - Script to run
+        required: when state is started
+    args:
+        description:
+            - Arguments to pass to the script
+    cwd:
+        description:
+            - The working directory to start the process with
+        default: user home directory
+    interpreter:
+        description:
+            - The interpreter for script
+        default: node
+    interpreter_args:
+        description:
+            - Arguments to call the interpreter process with
+
+author:
+    - Javier Palacios (javiplx@gmail.com)
+`;
+
+
 var pm2 = require('pm2');
 
 
@@ -16,10 +62,31 @@ for (var i = 2; i < process.argv.length; i+=2) {
   }
 
 
-// Verify required arguments
+// Verify arguments
+
+var arguments = ["name", "state", "script", "args", "cwd", "interpreter", "interpreter_args"];
+var unknowns = Object.keys(module_args).filter(function(item){
+  // Using the arguments variable causes an error
+  return ! ["name", "state", "script", "args", "cwd", "interpreter", "interpreter_args"].includes(item);
+  });
+if ( unknowns.length != 0 ) {
+  console.log(JSON.stringify({"failed": true, "msg": "Unknown arguments: '" + unknowns.join("', '") + "'"}));
+  process.exit(1);
+  }
 
 if ( ! module_args.name ) {
   console.log(JSON.stringify({"failed": true, "msg": "Missing required argument 'name'"}));
+  process.exit(1);
+  }
+
+if ( ( module_args.state === "started" && ! module_args.script ) || ( ! module_args.state && ! module_args.script ) ) {
+  console.log(JSON.stringify({"failed": true, "msg": "When state is 'started' argument 'script' is required"}));
+  process.exit(1);
+  }
+
+var states = [ "started", "stopped", "absent"];
+if ( ! states.includes(module_args.state) ) {
+  console.log(JSON.stringify({"failed": true, "msg": "Unknown state '" + module_args.state + "' given"}));
   process.exit(1);
   }
 
