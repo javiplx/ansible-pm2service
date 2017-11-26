@@ -56,10 +56,24 @@ var pm2 = require('pm2');
 var ansible_opts = {};
 var module_args = {};
 
-for (var i = 2; i < process.argv.length; i+=2) {
-  var key = process.argv[i];
-  key.startsWith("_ansible_") ? ansible_opts[key.substring(9)] = process.argv[i+1] : module_args[key] = process.argv[i+1];
-  }
+require('fs').
+  readFileSync(process.argv[2], 'utf8').
+  split(" ").reduce(function(result, item){
+    if ( result.endsWith(",") )
+      result += item;
+    else
+      result += " " + item ;
+    return result;
+    },"").split(" ").
+  forEach(function(item){
+    if ( item ) {
+      var kv = item.split("=");
+      if( kv[0].startsWith("_ansible_") )
+        ansible_opts[kv[0].substring(9)] = kv[1]
+      else
+        module_args[kv[0]] = kv[1];
+      }
+    });
 
 
 // Verify arguments
