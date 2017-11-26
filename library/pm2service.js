@@ -88,10 +88,10 @@ pm2.connect(true, function(err) {
       var changes = Object.keys(module_args).filter(function(name){
         return module_args[name]!=service[name];
       }).reduce(function(result,name){
-        name === "args"
+        ["interpreterArgs", "args"].includes(name)
           ? service[name] = module_args[name].split(" ")
           : service[name] = module_args[name];
-        result[name] = module_args[name].split(" ");
+        result[name] = module_args[name];
         return result;
         },{});
 
