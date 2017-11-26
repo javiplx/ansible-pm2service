@@ -189,6 +189,7 @@ pm2.connect(true, function(err) {
           pm2.disconnect();
           });
       } else {
+        console.log(JSON.stringify(result));
         pm2.disconnect();
         }
       }
