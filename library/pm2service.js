@@ -117,42 +117,29 @@ pm2.connect(true, function(err) {
     process.exit(2);
     }
 
-  var services = [];
-
-  pm2.list(function(err, processDescriptionList){
+  pm2.describe(module_args.name, function(err, processDescription){
     if (err) {
       console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
       pm2.disconnect();
       process.exit(2);
       }
-    processDescriptionList.forEach(function(process){
-      services.push(parseProcess(process.name, process.pm2_env));
-      });
-    pm2.disconnect();
 
-    var service = services.filter(function(item){return item.name===module_args.name})[0];
+    if ( processDescription.length == 0 ) {
+      var service = parseProcess(module_args.name, module_args);
 
-    if ( service === undefined ) {
-      // The only secure way to ensure sequential execution seems to enclose connects within connect within connects ...
-      pm2.connect(true, function(err) {
+      pm2.start(service, function(err, services) {
         if (err) {
           console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
           pm2.disconnect();
           process.exit(2);
           }
-        service = parseProcess(module_args.name, module_args);
-        pm2.start(service, function(err, services) {
-          if (err) {
-            console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
-            pm2.disconnect();
-            process.exit(2);
-            }
-          var service = parseProcess(services[0].pm2_env.name, services[0].pm2_env);
-          console.log(JSON.stringify({"changed": true, "changes": service}));
-          pm2.disconnect();
-          });
+        var service = parseProcess(services[0].pm2_env.name, services[0].pm2_env);
+        console.log(JSON.stringify({"changed": true, "changes": service}));
+        pm2.disconnect();
         });
     } else {
+      var service = parseProcess(processDescription[0].name, processDescription[0].pm2_env);
+
       var result = { "changed": false };
 
       var changes = Object.keys(module_args).filter(function(name){
@@ -168,25 +155,19 @@ pm2.connect(true, function(err) {
       if ( Object.keys(changes).length != 0 ) {
         result.changed = true;
         result.changes = changes;
-        pm2.connect(true, function(err) {
+        pm2.restart(service, function(err, services) {
           if (err) {
-            console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
+            console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err, "otros": services}));
             pm2.disconnect();
             process.exit(2);
             }
-
-          pm2.restart(service, function(err, services) {
-            if (err) {
-              console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err, "otros": services}));
-              pm2.disconnect();
-              process.exit(2);
-              }
-            var service = parseProcess(services[0].pm2_env.name, services[0].pm2_env);
-            console.log(JSON.stringify({"CHANGED": true, "changes": service}));
-            console.log(JSON.stringify(result));
-            pm2.disconnect();
-            });
+          var service = parseProcess(services[0].pm2_env.name, services[0].pm2_env);
+          console.log(JSON.stringify({"changed": true, "changes": service}));
+          console.log(JSON.stringify(result));
+          pm2.disconnect();
           });
+      } else {
+        pm2.disconnect();
         }
       }
 
