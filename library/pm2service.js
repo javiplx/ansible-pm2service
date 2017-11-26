@@ -177,7 +177,7 @@ pm2.connect(true, function(err) {
 
           pm2.restart(service, function(err, services) {
             if (err) {
-              console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err, "otros": apps}));
+              console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err, "otros": services}));
               pm2.disconnect();
               process.exit(2);
               }
