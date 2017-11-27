@@ -1,0 +1,60 @@
+
+# syntax errors
+
+- name: no arguments
+  args: {}
+
+- name: missing script
+  args:
+    name: myapp
+    state: started
+
+- name: implicit start with missing script
+  args:
+    name: myapp
+
+- name: invalid state
+  args:
+    name: myapp
+    state: badstate
+
+- name: report unknown argument
+  args:
+    name: myapp
+    badargument: value
+
+- name: report list of unknown arguments
+  args:
+    name: myapp
+    badargument: value
+    anotherbadargument: badvalue
+
+
+- name: new service
+  args:
+    name: nuevapp
+    interpreter: node
+    script: server.js
+
+- name: unchanged service
+  args:
+    name: myapp
+    interpreter: node
+    script: server.js
+
+- name: restarts due to changes
+  args:
+    name: myapp
+    args: --config.$RANDOM
+    script: server.js
+
+- name: stops service
+  args:
+    name: myapp
+    state: stopped
+
+- name: removes service
+  args:
+    name: myapp
+    state: absent
+
