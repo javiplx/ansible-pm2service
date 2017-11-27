@@ -3,6 +3,11 @@
 import yaml
 import json
 
+from ansible.module_utils.six import iteritems
+from ansible.module_utils.six.moves import shlex_quote
+from ansible.module_utils.six import text_type
+from ansible.module_utils._text import to_bytes
+
 import tempfile
 import subprocess
 import os
@@ -18,7 +23,11 @@ fd = tempfile.NamedTemporaryFile()
 
 for test in doc :
     testfile = tempfile.NamedTemporaryFile()
-    json.dump({'ANSIBLE_MODULE_ARGS': test['args']}, testfile, indent=4)
+    args_data = ""
+    for k, v in iteritems(test["module_args"]):
+        args_data += '%s=%s ' % (k, shlex_quote(text_type(v)))
+    data = to_bytes(args_data, errors='surrogate_or_strict')
+    testfile.write(data)
     outputs[test["name"]] = testfile
     fd.write( "node {0} {1} > {1}.stdout 2> {1}.stderr\n".format(os.path.realpath(library), testfile.name) )
     testfile.flush()
