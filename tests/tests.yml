@@ -38,31 +38,36 @@
 
 - name: new service
   module_args:
-    name: nuevapp
+    name: myapp
     interpreter: node
     script: server.js
+  pm2service: +myapp
 
 - name: unchanged service
   module_args:
     name: myapp
     interpreter: node
     script: server.js
+  pm2service: =myapp
 
 - name: restarts due to changes
   module_args:
     name: myapp
     args: --config $RANDOM
     script: server.js
+  pm2service: ~myapp
 
 - name: stops service
   skip: true
   module_args:
     name: myapp
     state: stopped
+  pm2service: ?myapp
 
 - name: removes service
   skip: true
   module_args:
     name: myapp
     state: absent
+  pm2service: -myapp
 

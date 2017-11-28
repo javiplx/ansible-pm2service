@@ -25,6 +25,11 @@ def pm2service ( name ) :
     else :
         return {}
 
+def pm2servicechange ( change , before , after ) :
+    if change == '+' :
+        return len(before) == 0 and len(after) > 0
+    else :
+        raise Exception( "Unknown change type '%s'" % change )
 
 doc = filter( lambda t : not t.get("skip", False) , yaml.load(open(testfile)) )
 
@@ -42,6 +47,8 @@ for test in doc :
     outputs[test["name"]] = testfile
     fd.write( "node {0} {1} > {1}.stdout 2> {1}.stderr\n".format(library, testfile.name) )
     testfile.flush()
+    if test.has_key("pm2service") :
+        test['before'] = pm2service( test["pm2service"][1:] )
 
 fd.flush()
 os.system( "bash %s" % fd.name )
@@ -67,6 +74,13 @@ for test in doc :
             if output.get("failed") :
                 print( "%s : ERROR, %s" % ( test["name"] , output.get("msg", "NO ERROR MESSAGE GIVEN")) )
             else :
-                print( "%s : OK" %  test["name"] )
+                if test.has_key("pm2service") :
+                    after = pm2service( test["pm2service"][1:] )
+                    if pm2servicechange( test["pm2service"][0] , test["before"] , after ) :
+                        print( "%s : OK" %  test["name"] )
+                    else :
+                        print( "%s : ERROR, %s" % ( test["name"] , output.get("msg", "Unexpected change in service state")) )
+                else :
+                    print( "%s : OK" %  test["name"] )
                 os.unlink("%s.stdout"%testfile)
 
