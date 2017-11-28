@@ -27,7 +27,15 @@ def pm2service ( name ) :
 
 def pm2servicechange ( change , before , after ) :
     if change == '+' :
-        return len(before) == 0 and len(after) > 0
+        return len(before) == 0 and len(after) > 0 and after["status"] == "online"
+    elif change == '=' :
+        return before["restart_time"] == after["restart_time"] and before["status"] == after["status"]
+    elif change == '-' :
+        return len(before) > 0 and len(after) == 0 and after["status"] == "stopped"
+    elif change == '?' :
+        return before["status"] == "online" and after["status"] == "stopped"
+    elif change == '~' :
+        return before["restart_time"] + 1 == after["restart_time"]
     else :
         raise Exception( "Unknown change type '%s'" % change )
 
