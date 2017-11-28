@@ -16,12 +16,14 @@ library = "library/pm2service.js"
 testfile = "tests.yml"
 
 
-def pm2list ( name=None ) :
-    processes = json.loads( subprocess.check_output(["/usr/bin/pm2", "jlist"]) )
-    if name :
-        [ p for p in processes if p["name"] == name ][0]
+def pm2service ( name ) :
+    processes = [ proc["pm2_env"]
+        for proc in json.loads( subprocess.check_output(["/usr/bin/pm2", "jlist"]) )
+        if proc["name"] == name ]
+    if processes :
+        return processes[0]
     else :
-        processes
+        return {}
 
 
 doc = filter( lambda t : not t.get("skip", False) , yaml.load(open(testfile)) )
