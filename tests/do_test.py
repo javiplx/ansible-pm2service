@@ -16,7 +16,7 @@ library = "library/pm2service.js"
 testfile = "tests.yml"
 
 
-doc = yaml.load(open(testfile))
+doc = filter( lambda t : not t.get("skip", False) , yaml.load(open(testfile)) )
 
 outputs = {}
 fd = tempfile.NamedTemporaryFile()

@@ -55,11 +55,13 @@
     script: server.js
 
 - name: stops service
+  skip: true
   module_args:
     name: myapp
     state: stopped
 
 - name: removes service
+  skip: true
   module_args:
     name: myapp
     state: absent
