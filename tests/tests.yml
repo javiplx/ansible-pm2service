@@ -3,31 +3,37 @@
 
 - name: no arguments
   module_args: {}
+  expect_fail: missing required argument
 
 - name: missing script
   module_args:
     name: myapp
     state: started
+  expect_fail: argument 'script' is required
 
 - name: implicit start with missing script
   module_args:
     name: myapp
+  expect_fail: argument 'script' is required
 
 - name: invalid state
   module_args:
     name: myapp
     state: badstate
+  expect_fail: unknown state
 
 - name: report unknown argument
   module_args:
     name: myapp
     badargument: value
+  expect_fail: unknown arguments
 
 - name: report list of unknown arguments
   module_args:
     name: myapp
     badargument: value
     anotherbadargument: badvalue
+  expect_fail: unknown arguments
 
 
 - name: new service

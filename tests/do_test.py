@@ -39,9 +39,23 @@ for test in doc :
     testfile = outputs[test["name"]].name
     if os.stat("%s.stderr"%testfile).st_size != 0 :
         print( "%s : ERROR, stderr not empty" % test["name"])
-    os.unlink("%s.stderr"%testfile)
-    output = json.load(open("%s.stdout"%testfile))
-    if output.get("failed") :
-        print( "%s : ERROR, %s" % ( test["name"] , output.get("msg", "NO ERROR MESSAGE GIVEN")) )
-    os.unlink("%s.stdout"%testfile)
+    else :
+        os.unlink("%s.stderr"%testfile)
+        output = json.load(open("%s.stdout"%testfile))
+        if test.has_key("expect_fail") :
+            failmsg = test["expect_fail"] or ""
+            if output.get("failed") :
+                if failmsg.lower() in output.get("msg", "").lower() :
+                    print( "%s : OK" % test["name"] )
+                    os.unlink("%s.stdout"%testfile)
+                else :
+                    print( "%s : ERROR, '%s' not present in failure message '%s'" % ( test["name"] , failmsg , output.get("msg", "NO ERROR MESSAGE GIVEN") ) )
+            else :
+                print( "%s : ERROR, expected failure" % test["name"] )
+        else :
+            if output.get("failed") :
+                print( "%s : ERROR, %s" % ( test["name"] , output.get("msg", "NO ERROR MESSAGE GIVEN")) )
+            else :
+                print( "%s : OK" %  test["name"] )
+                os.unlink("%s.stdout"%testfile)
 
