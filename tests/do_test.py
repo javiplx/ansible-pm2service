@@ -12,7 +12,7 @@ import tempfile
 import subprocess
 import os
 
-library = "../library/pm2service.js"
+library = "library/pm2service.js"
 testfile = "tests.yml"
 
 
@@ -20,6 +20,7 @@ doc = yaml.load(open(testfile))
 
 outputs = {}
 fd = tempfile.NamedTemporaryFile()
+fd.write( "cd %s\n" % os.path.realpath('..') )
 
 for test in doc :
     testfile = tempfile.NamedTemporaryFile()
@@ -29,7 +30,7 @@ for test in doc :
     data = to_bytes(args_data, errors='surrogate_or_strict')
     testfile.write(data)
     outputs[test["name"]] = testfile
-    fd.write( "node {0} {1} > {1}.stdout 2> {1}.stderr\n".format(os.path.realpath(library), testfile.name) )
+    fd.write( "node {0} {1} > {1}.stdout 2> {1}.stderr\n".format(library, testfile.name) )
     testfile.flush()
 
 fd.flush()
