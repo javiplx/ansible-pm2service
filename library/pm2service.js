@@ -58,13 +58,23 @@ var module_args = {};
 
 require('fs').
   readFileSync(process.argv[2], 'utf8').
-  split(" ").reduce(function(result, item){
-    if ( result.endsWith(",") )
-      result += item;
-    else
-      result += " " + item ;
+  match(/[^\s"]+|"([^"]*)"/gi).
+  reduce(function(result, item){
+    if ( item.includes("=") )
+      result.push(item);
+    else {
+      if ( ! result[result.length-1].endsWith("=") )
+        result[result.length-1] += " ";
+      result[result.length-1] += item;
+      }
     return result;
-    },"").split(" ").
+  }, []).
+  map(function(item){
+    var items = item.split("=");
+    if ( items[1].startsWith('"') && items[1].endsWith('"') )
+      items[1] = items[1].substring(1, items[1].length-1);
+    return items.join("=");
+    }).
   forEach(function(item){
     if ( item ) {
       var kv = item.split("=");
