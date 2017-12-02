@@ -51,7 +51,7 @@
     interpreter: node
     script: server.js
   pm2service: =myapp
-  setUp: pm2 delete all
+  setUp: pm2 start server.js --name myapp
   tearDown: pm2 kill
 
 - name: restarts due to changes
@@ -60,24 +60,22 @@
     args: --config $RANDOM
     script: server.js
   pm2service: ~myapp
-  setUp: pm2 delete all
+  setUp: pm2 start server.js --name myapp
   tearDown: pm2 kill
 
 - name: stops service
-  skip: true
   module_args:
     name: myapp
     state: stopped
   pm2service: ?myapp
-  setUp: pm2 delete all
+  setUp: pm2 start server.js --name myapp
   tearDown: pm2 kill
 
 - name: removes service
-  skip: true
   module_args:
     name: myapp
     state: absent
   pm2service: -myapp
-  setUp: pm2 delete all
+  setUp: pm2 start server.js --name myapp
   tearDown: pm2 kill
 
