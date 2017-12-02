@@ -211,7 +211,7 @@ pm2.connect(true, function(err) {
           pm2.disconnect();
           }
       } else {
-        var result = { "changed": grue , "changes": { "state": module_args.state } };
+        var result = { "changed": true , "changes": { "state": module_args.state } };
         if ( module_args.state == "stopped" ) {
           pm2.stop(module_args.name, function(err) {
             if (err) {
