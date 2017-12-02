@@ -56,34 +56,37 @@ var pm2 = require('pm2');
 var ansible_opts = {};
 var module_args = {};
 
-require('fs').
+var input = require('fs').
   readFileSync(process.argv[2], 'utf8').
-  match(/[^\s"]+|"([^"]*)"/gi).
-  reduce(function(result, item){
-    if ( item.includes("=") )
-      result.push(item);
-    else {
-      if ( ! result[result.length-1].endsWith("=") )
-        result[result.length-1] += " ";
-      result[result.length-1] += item;
-      }
-    return result;
-  }, []).
-  map(function(item){
-    var items = item.split("=");
-    if ( items[1].startsWith('"') && items[1].endsWith('"') )
-      items[1] = items[1].substring(1, items[1].length-1);
-    return items.join("=");
-    }).
-  forEach(function(item){
-    if ( item ) {
-      var kv = item.split("=");
-      if( kv[0].startsWith("_ansible_") )
-        ansible_opts[kv[0].substring(9)] = kv[1]
-      else
-        module_args[kv[0]] = kv[1];
-      }
-    });
+  match(/[^\s"]+|"([^"]*)"/gi);
+
+if ( input != null )
+  input.
+    reduce(function(result, item){
+      if ( item.includes("=") )
+        result.push(item);
+      else {
+        if ( ! result[result.length-1].endsWith("=") )
+          result[result.length-1] += " ";
+        result[result.length-1] += item;
+        }
+      return result;
+    }, []).
+    map(function(item){
+      var items = item.split("=");
+      if ( items[1].startsWith('"') && items[1].endsWith('"') )
+        items[1] = items[1].substring(1, items[1].length-1);
+      return items.join("=");
+      }).
+    forEach(function(item){
+      if ( item ) {
+        var kv = item.split("=");
+        if( kv[0].startsWith("_ansible_") )
+          ansible_opts[kv[0].substring(9)] = kv[1]
+        else
+          module_args[kv[0]] = kv[1];
+        }
+      });
 
 
 // Verify arguments
