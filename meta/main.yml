@@ -4,6 +4,7 @@ galaxy_info:
   author: Javier Palacios
   description: Manage services with pm2
   license: GPLv2
+  platforms: []
 
 dependencies: []
 
