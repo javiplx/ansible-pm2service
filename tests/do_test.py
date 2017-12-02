@@ -31,7 +31,7 @@ def pm2servicechange ( change , before , after ) :
     elif change == '=' :
         return before["restart_time"] == after["restart_time"] and before["status"] == after["status"]
     elif change == '-' :
-        return len(before) > 0 and len(after) == 0 and after["status"] == "stopped"
+        return len(before) > 0 and len(after) == 0
     elif change == '?' :
         return before["status"] == "online" and after["status"] == "stopped"
     elif change == '~' :
