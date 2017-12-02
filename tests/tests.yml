@@ -42,6 +42,8 @@
     interpreter: node
     script: server.js
   pm2service: +myapp
+  setUp: pm2 delete all
+  tearDown: pm2 kill
 
 - name: unchanged service
   module_args:
@@ -49,6 +51,8 @@
     interpreter: node
     script: server.js
   pm2service: =myapp
+  setUp: pm2 delete all
+  tearDown: pm2 kill
 
 - name: restarts due to changes
   module_args:
@@ -56,6 +60,8 @@
     args: --config $RANDOM
     script: server.js
   pm2service: ~myapp
+  setUp: pm2 delete all
+  tearDown: pm2 kill
 
 - name: stops service
   skip: true
@@ -63,6 +69,8 @@
     name: myapp
     state: stopped
   pm2service: ?myapp
+  setUp: pm2 delete all
+  tearDown: pm2 kill
 
 - name: removes service
   skip: true
@@ -70,4 +78,6 @@
     name: myapp
     state: absent
   pm2service: -myapp
+  setUp: pm2 delete all
+  tearDown: pm2 kill
 
