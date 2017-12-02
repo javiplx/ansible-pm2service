@@ -83,11 +83,14 @@ for test in doc :
                 print( "%s : ERROR, %s" % ( test["name"] , output.get("msg", "NO ERROR MESSAGE GIVEN")) )
             else :
                 if test.has_key("pm2service") :
-                    after = pm2service( test["pm2service"][1:] )
-                    if pm2servicechange( test["pm2service"][0] , test["before"] , after ) :
-                        print( "%s : OK" %  test["name"] )
-                    else :
-                        print( "%s : ERROR, %s" % ( test["name"] , output.get("msg", "Unexpected change in service state")) )
+                    try :
+                        after = pm2service( test["pm2service"][1:] )
+                        if pm2servicechange( test["pm2service"][0] , test["before"] , after ) :
+                            print( "%s : OK" %  test["name"] )
+                        else :
+                            print( "%s : ERROR, %s" % ( test["name"] , output.get("msg", "Unexpected change in service state")) )
+                    except Exception, ex:
+                        print( "%s : EXCEPTION, %s" % ( test["name"] , ex ) )
                 else :
                     print( "%s : OK" %  test["name"] )
                 os.unlink("%s.stdout"%testfile)
