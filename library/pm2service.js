@@ -151,7 +151,11 @@ if ( module_args.module ) {
       console.log(JSON.stringify({"failed": true, "msg": "npm error : " + err}));
       process.exit(2);
       }
+    // https://github.com/npm/npm/issues/10732#issuecomment-229409220
+    var cl = console.log;
+    console.log = function() {};
     npm.commands.install([module_args.module], function (err, data) {
+      console.log = cl;
       if (err) {
         console.log(JSON.stringify({"failed": true, "msg": "npm error : " + err}));
         process.exit(2);
