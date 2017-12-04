@@ -38,6 +38,7 @@
 
 - name: new service
   module_args:
+    module: sinopia
     name: myapp
     interpreter: node
     script: server.js

@@ -97,7 +97,7 @@ if ( input != null )
 var arguments = ["name", "state", "script", "args", "cwd", "interpreter", "interpreter_args", "module"];
 var unknowns = Object.keys(module_args).filter(function(item){
   // Using the arguments variable causes an error
-  return ! ["name", "state", "script", "args", "cwd", "interpreter", "interpreter_args"].includes(item);
+  return ! ["name", "state", "script", "args", "cwd", "interpreter", "interpreter_args", "module"].includes(item);
   });
 if ( unknowns.length != 0 ) {
   console.log(JSON.stringify({"failed": true, "msg": "Unknown arguments: '" + unknowns.join("', '") + "'"}));
