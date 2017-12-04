@@ -144,6 +144,23 @@ function parseProcess(name, env){
   }
 
 
+var npm = require('npm');
+if ( module_args.module ) {
+  npm.load(function (err) {
+    if (err) {
+      console.log(JSON.stringify({"failed": true, "msg": "npm error : " + err}));
+      process.exit(2);
+      }
+    npm.commands.install([module_args.module], function (err, data) {
+      if (err) {
+        console.log(JSON.stringify({"failed": true, "msg": "npm error : " + err}));
+        process.exit(2);
+      }
+     })
+   })
+ }
+
+
 var pm2 = require('pm2');
 
 pm2.connect(true, function(err) {
