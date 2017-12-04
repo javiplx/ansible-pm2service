@@ -42,6 +42,9 @@ options:
     interpreter_args:
         description:
             - Arguments to call the interpreter process with
+    module:
+        description:
+            - NPM module providing the application
 
 author:
     - Javier Palacios (javiplx@gmail.com)
@@ -91,7 +94,7 @@ if ( input != null )
 
 // Verify arguments
 
-var arguments = ["name", "state", "script", "args", "cwd", "interpreter", "interpreter_args"];
+var arguments = ["name", "state", "script", "args", "cwd", "interpreter", "interpreter_args", "module"];
 var unknowns = Object.keys(module_args).filter(function(item){
   // Using the arguments variable causes an error
   return ! ["name", "state", "script", "args", "cwd", "interpreter", "interpreter_args"].includes(item);
