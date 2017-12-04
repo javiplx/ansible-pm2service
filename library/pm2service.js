@@ -141,35 +141,35 @@ function parseProcess(name, env){
   }
 
 
+function exit_json(result) {
+  console.log(JSON.stringify(result));
+  pm2.disconnect();
+  process.exit(0);
+  }
+
+function fail_json(err) {
+  console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
+  pm2.disconnect();
+  process.exit(2);
+  }
+
+
 var pm2 = require('pm2');
 
 pm2.connect(true, function(err) {
-  if (err) {
-    console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
-    pm2.disconnect();
-    process.exit(2);
-    }
+  if (err) fail_json(err);
 
   pm2.describe(module_args.name, function(err, processDescription){
-    if (err) {
-      console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
-      pm2.disconnect();
-      process.exit(2);
-      }
+    if (err) fail_json(err);
 
     if ( processDescription.length == 0 ) {
       if ( module_args.state == "started" ) {
         pm2.start(parseProcess(module_args.name, module_args), function(err, apps) {
-          if (err) {
-            console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
-            pm2.disconnect();
-            process.exit(2);
-            }
-          console.log(JSON.stringify({"changed": true, "changes": parseProcess(apps[0])}));
-          pm2.disconnect();
+          if (err) fail_json(err);
+          exit_json({"changed": true, "changes": parseProcess(apps[0])});
           });
       } else { // stopped is considered valid for a non existing service
-        console.log(JSON.stringify({"changed": false}));
+        exit_json({"changed": false});
       }
     } else {
       if ( module_args.state == "started" ) {
@@ -198,39 +198,23 @@ pm2.connect(true, function(err) {
           result.changes = changes;
           result.changes.state = "restarted";
           pm2.restart(service, function(err, apps) {
-            if (err) {
-              console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err, "otros": apps}));
-              pm2.disconnect();
-              process.exit(2);
-              }
-            console.log(JSON.stringify(result));
-            pm2.disconnect();
+            if (err) fail_json(err);
+            exit_json(result);
             });
         } else {
-          console.log(JSON.stringify(result));
-          pm2.disconnect();
+          exit_json(result);
           }
       } else {
         var result = { "changed": true , "changes": { "state": module_args.state } };
         if ( module_args.state == "stopped" ) {
           pm2.stop(module_args.name, function(err) {
-            if (err) {
-              console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
-              pm2.disconnect();
-              process.exit(2);
-              }
-            console.log(JSON.stringify(result));
-            pm2.disconnect();
+            if (err) fail_json(err);
+            exit_json(result);
             });
         } else { // absent
           pm2.delete(module_args.name, function(err) {
-            if (err) {
-              console.log(JSON.stringify({"failed": true, "msg": "pm2 error : " + err}));
-              pm2.disconnect();
-              process.exit(2);
-              }
-            console.log(JSON.stringify(result));
-            pm2.disconnect();
+            if (err) fail_json(err);
+            exit_json(result);
             });
           }
         }
