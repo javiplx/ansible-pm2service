@@ -48,6 +48,10 @@ author:
 `;
 
 
+// Although npm automatically installs here, that path is not automatically searched ...
+module.paths.push('/usr/lib/node_modules');
+
+
 var pm2 = require('pm2');
 
 
