@@ -74,7 +74,7 @@ if ( input != null )
     }, []).
     map(function(item){
       var items = item.split("=");
-      if ( items[1].startsWith('"') && items[1].endsWith('"') )
+      if ( items[1].startsWith("'") && items[1].endsWith("'") )
         items[1] = items[1].substring(1, items[1].length-1);
       return items.join("=");
       }).
