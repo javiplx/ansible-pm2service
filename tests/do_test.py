@@ -16,9 +16,14 @@ library = "library/pm2service.js"
 testfile = "tests/tests.yml"
 
 
+pm2_binary = "/usr/bin/pm2"
+if len(os.sys.argv) > 1 :
+    pm2_binary = os.sys.argv[1]
+
+
 def pm2service ( name ) :
     processes = [ proc["pm2_env"]
-        for proc in json.loads( subprocess.check_output(["/usr/bin/pm2", "jlist"]) )
+        for proc in json.loads( subprocess.check_output([pm2_binary, "jlist"]) )
         if proc["name"] == name ]
     if processes :
         return processes[0]
@@ -39,6 +44,8 @@ def pm2servicechange ( change , before , after ) :
     else :
         raise Exception( "Unknown change type '%s'" % change )
 
+ret = 0
+
 doc = filter( lambda t : not t.get("skip", False) , yaml.load(open(testfile)) )
 
 for test in doc :
@@ -57,6 +64,8 @@ for test in doc :
 
     if os.stat("%s.stderr"%testfile.name).st_size != 0 :
         print( "%s : ERROR, stderr not empty" % test["name"])
+        print( "".join( open("%s.stderr"%testfile.name).readlines() ) )
+        ret = 1
     else :
         os.unlink("%s.stderr"%testfile.name)
         output = json.load(open("%s.stdout"%testfile.name))
@@ -68,11 +77,17 @@ for test in doc :
                     os.unlink("%s.stdout"%testfile.name)
                 else :
                     print( "%s : ERROR, '%s' not present in failure message '%s'" % ( test["name"] , failmsg , output.get("msg", "NO ERROR MESSAGE GIVEN") ) )
+                    print( "".join( open("%s.stdout"%testfile.name).readlines() ) )
+                    ret = 1
             else :
                 print( "%s : ERROR, expected failure" % test["name"] )
+                print( "".join( open("%s.stdout"%testfile.name).readlines() ) )
+                ret = 1
         else :
             if output.get("failed") :
                 print( "%s : ERROR, %s" % ( test["name"] , output.get("msg", "NO ERROR MESSAGE GIVEN")) )
+                print( "".join( open("%s.stdout"%testfile.name).readlines() ) )
+                ret = 1
             else :
                 if test.has_key("pm2service") :
                     try :
@@ -82,12 +97,18 @@ for test in doc :
                             os.unlink("%s.stdout"%testfile.name)
                         else :
                             print( "%s : ERROR, %s" % ( test["name"] , output.get("msg", "Unexpected change in service state")) )
+                            print( "".join( open("%s.stdout"%testfile.name).readlines() ) )
+                            ret = 1
                     except Exception, ex:
                         print( "%s : EXCEPTION, %s" % ( test["name"] , ex ) )
+                        print( "".join( open("%s.stdout"%testfile.name).readlines() ) )
+                        ret = 1
                 else :
                     print( "%s : OK" %  test["name"] )
                     os.unlink("%s.stdout"%testfile.name)
 
     if test.has_key( "tearDown" ) :
         os.system( "%s > /dev/null 2>&1" % test["tearDown"] )
+
+os.sys.exit(ret)
 
