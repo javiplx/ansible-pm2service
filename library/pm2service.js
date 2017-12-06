@@ -57,7 +57,8 @@ var ansible_opts = {};
 var module_args = {};
 
 var input = require('fs').
-  readFileSync(process.argv[2], 'utf8');
+  readFileSync(process.argv[2], 'utf8').
+  trim();
 
 if ( input )
   input.split(" ").
