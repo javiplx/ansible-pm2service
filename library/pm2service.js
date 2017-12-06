@@ -57,11 +57,10 @@ var ansible_opts = {};
 var module_args = {};
 
 var input = require('fs').
-  readFileSync(process.argv[2], 'utf8').
-  match(/[^\s"]+|"([^"]*)"/gi);
+  readFileSync(process.argv[2], 'utf8');
 
-if ( input != null )
-  input.
+if ( input )
+  input.split(" ").
     reduce(function(result, item){
       if ( item.includes("=") )
         result.push(item);
@@ -71,21 +70,15 @@ if ( input != null )
         result[result.length-1] += item;
         }
       return result;
-    }, []).
-    map(function(item){
-      var items = item.split("=");
-      if ( items[1].startsWith("'") && items[1].endsWith("'") )
-        items[1] = items[1].substring(1, items[1].length-1);
-      return items.join("=");
-      }).
+      }, []).
     forEach(function(item){
-      if ( item ) {
-        var kv = item.split("=");
-        if( kv[0].startsWith("_ansible_") )
+      var kv = item.split("=");
+      if ( kv[1].startsWith("'") && kv[1].endsWith("'") )
+        kv[1] = kv[1].substring(1, kv[1].length-1);
+      if( kv[0].startsWith("_ansible_") )
           ansible_opts[kv[0].substring(9)] = kv[1]
         else
           module_args[kv[0]] = kv[1];
-        }
       });
 
 
