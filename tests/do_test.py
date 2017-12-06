@@ -16,9 +16,14 @@ library = "library/pm2service.js"
 testfile = "tests/tests.yml"
 
 
+pm2_binary = "/usr/bin/pm2"
+if len(os.sys.argv) > 1 :
+    pm2_binary = os.sys.argv[1]
+
+
 def pm2service ( name ) :
     processes = [ proc["pm2_env"]
-        for proc in json.loads( subprocess.check_output(["/usr/bin/pm2", "jlist"]) )
+        for proc in json.loads( subprocess.check_output([pm2_binary, "jlist"]) )
         if proc["name"] == name ]
     if processes :
         return processes[0]

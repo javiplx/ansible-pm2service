@@ -6,6 +6,6 @@ node_js:
   - 7
   - 8
 before_install:
-  - npm install --global pm2
+  - npm install pm2
 script:
-  - python tests/do_test.py
+  - python tests/do_test.py node_modules/.bin/pm2
