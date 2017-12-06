@@ -59,6 +59,7 @@ for test in doc :
 
     if os.stat("%s.stderr"%testfile.name).st_size != 0 :
         print( "%s : ERROR, stderr not empty" % test["name"])
+        print( "".join( open("%s.stderr"%testfile.name).readlines() ) )
         ret = 1
     else :
         os.unlink("%s.stderr"%testfile.name)
@@ -71,13 +72,16 @@ for test in doc :
                     os.unlink("%s.stdout"%testfile.name)
                 else :
                     print( "%s : ERROR, '%s' not present in failure message '%s'" % ( test["name"] , failmsg , output.get("msg", "NO ERROR MESSAGE GIVEN") ) )
+                    print( "".join( open("%s.stdout"%testfile.name).readlines() ) )
                     ret = 1
             else :
                 print( "%s : ERROR, expected failure" % test["name"] )
+                print( "".join( open("%s.stdout"%testfile.name).readlines() ) )
                 ret = 1
         else :
             if output.get("failed") :
                 print( "%s : ERROR, %s" % ( test["name"] , output.get("msg", "NO ERROR MESSAGE GIVEN")) )
+                print( "".join( open("%s.stdout"%testfile.name).readlines() ) )
                 ret = 1
             else :
                 if test.has_key("pm2service") :
@@ -88,9 +92,11 @@ for test in doc :
                             os.unlink("%s.stdout"%testfile.name)
                         else :
                             print( "%s : ERROR, %s" % ( test["name"] , output.get("msg", "Unexpected change in service state")) )
+                            print( "".join( open("%s.stdout"%testfile.name).readlines() ) )
                             ret = 1
                     except Exception, ex:
                         print( "%s : EXCEPTION, %s" % ( test["name"] , ex ) )
+                        print( "".join( open("%s.stdout"%testfile.name).readlines() ) )
                         ret = 1
                 else :
                     print( "%s : OK" %  test["name"] )
